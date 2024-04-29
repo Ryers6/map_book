@@ -1,6 +1,5 @@
 from models.data import users
-from utils.crud import show_users, add_new_user, search_user,remove_user
-from
+from utils.crud import show_users, add_new_user, search_user, remove_user
 
 
 if __name__ == "__main__":
