@@ -1,5 +1,5 @@
-from tkinter import *
 import requests
+from tkinter import *
 import tkintermapview
 
 users: list = []
@@ -7,14 +7,18 @@ users: list = []
 
 class User:
     def __init__(self, name, surname, posts, location):
-        self.name = name
-        self.surname = surname
-        self.posts = posts
-        self.location = location
-        self.cords = self.get_coordinates()
-        self.marker= map_widget.set_marker(self.cords[0], self.cords[1], text=f"{self.location}")
+        self.name: str = name
+        self.surname: str = surname
+        self.posts: int = posts
+        self.location: str = location
+        self.cords: list = self.get_coordinates()
+        self.marker: object = map_widget.set_marker(self.cords[0], self.cords[1], text=f"{self.location}")
 
-    def get_cordinates(self):
+    def get_coordinates(self) -> list[float]:
+        """
+        Function to get the coordinates of user
+        :return: list of coordinates of user
+        """
         url: str = f'https://en.wikipedia.org/wiki/{self.location}'
         response = requests.get(url)
         response_html = BeautifulSoup(response.text, features="html.parser")
@@ -23,9 +27,17 @@ class User:
         return [latitude, longitude]
 
 
-def add_new_user():
-    user = User(name=entry_name.get(), surname=entry_surname.get(), posts=entry_posts.get(),
-                location=entry_location.get())
+def add_new_user() -> None:
+    """
+    Function to add new user
+    :return:
+    """
+    user = (User(
+        name=entry_name.get(),
+        surname=entry_surname.get(),
+        posts=entry_posts.get(),
+        location=entry_location.get())
+    )
     users.append(user)
     display_users()
     entry_name.delete(0, END)
@@ -35,46 +47,51 @@ def add_new_user():
     entry_name.focus()
 
 
-
-def display_users():
+def display_users() -> None:
     listbox_lista_uzytkownikow.delete(0, END)
     for idx, user in enumerate(users):
         listbox_lista_uzytkownikow.insert(idx, f'{idx + 1}. {user.name} {user.surname}')
 
 
-def delete_user():
-
+def delete_user() -> None:
     print(listbox_lista_uzytkownikow.index(ACTIVE))
     users[listbox_lista_uzytkownikow.index(ACTIVE)].marker.delete()
     users.pop(listbox_lista_uzytkownikow.index(ACTIVE))
     display_users()
 
 
-
-def show_user_details():
+def show_user_details() -> None:
     i = listbox_lista_uzytkownikow.index(ACTIVE)
     label_opis_name_uzytkownika_wartosc.config(text=users[i].name)
     label_opis_surname_uzytkownika_wartosc.config(text=users[i].surname)
     label_opis_posts_uzytkownika_wartosc.config(text=users[i].posts)
     label_opis_location_uzytkownika_wartosc.config(text=users[i].location)
+    map_widget.set_position(users[i].cords[0], users[i].cords[1])
+    map_widget.set_zoom(13)
 
-def edit_user():
+
+def edit_user() -> None:
     entry_name.delete(0, END)
     entry_surname.delete(0, END)
     entry_posts.delete(0, END)
     entry_location.delete(0, END)
-    i=listbox_lista_uzytkownikow.index(ACTIVE)
+    i = listbox_lista_uzytkownikow.index(ACTIVE)
     entry_name.insert(END, users[i].name)
 
     button_dodaj_uztykownika.config(text="Zapisz zmiany", command=lambda: update_user(i))
     display_users()
-def update_user(i):
+
+
+def update_user(i) -> None:
     users[i].name = entry_name.get()
     users[i].surname = entry_surname.get()
     users[i].posts = entry_posts.get()
     users[i].location = entry_location.get()
+    users[i].marker.delete()
+    users[i].location = map_widget.set_marker(users[i].cords[0], users[i].cords[1], text=f"{users[i].location}")
+
     display_users()
-    button_dodaj_uztykownika.config(text="Zapisz zmiany",command=add_new_user)
+    button_dodaj_uztykownika.config(text="Zapisz zmiany", command=add_new_user)
     entry_name.delete(0, END)
     entry_surname.delete(0, END)
     entry_posts.delete(0, END)
@@ -113,7 +130,7 @@ label_napis_formularz = Label(ramka_formularz, text='Formularz edycji i dodawani
 label_name = Label(ramka_formularz, text='Imię')
 label_surname = Label(ramka_formularz, text='Nazwisko')
 label_posts = Label(ramka_formularz, text='Liczba postów')
-label_location = Label(ramka_formularz, text='Miejscowosc')
+label_location = Label(ramka_formularz, text='Miejscowość')
 
 entry_name = Entry(ramka_formularz)
 entry_surname = Entry(ramka_formularz, width=30)
@@ -156,22 +173,9 @@ label_opis_posts_uzytkownika_wartosc.grid(row=1, column=6)
 label_opis_location_uzytkownika.grid(row=1, column=7)
 label_opis_location_uzytkownika_wartosc.grid(row=1, column=8)
 
-
-map_widget=tkintermapview.TkinterMapView(ramka_szczegoly_uzytkownika, width=800, height=300)
+map_widget = tkintermapview.TkinterMapView(ramka_szczegoly_uzytkownika, width=800, height=400)
 map_widget.grid(row=2, column=0, columnspan=8)
-map_widget.set_position(52.21,21.00)
-map_widget.set_zoom(10)
-
-
-
-
-
-
-
-
-
-
-
-
+map_widget.set_position(52.21, 21.00)
+map_widget.set_zoom(6)
 
 root.mainloop()
