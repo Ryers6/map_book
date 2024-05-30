@@ -1,5 +1,6 @@
 import requests
 from tkinter import *
+from bs4 import BeautifulSoup
 import tkintermapview
 
 users: list = []
@@ -16,14 +17,14 @@ class User:
 
     def get_coordinates(self) -> list[float]:
         """
-        Function to get the coordinates of user
+        Function to get coordinates of user
         :return: list of coordinates of user
         """
-        url: str = f'https://en.wikipedia.org/wiki/{self.location}'
+        url: str = f"https://pl.wikipedia.org/wiki/{self.location}"
         response = requests.get(url)
-        response_html = BeautifulSoup(response.text, features="html.parser")
-        latitude = float(response_html.select('latitude')[1].text.replace(",", "."))
-        longitude = float(response_html.select('longitude')[1].text.replace(",", "."))
+        response_html = BeautifulSoup(response.text, "html.parser")
+        latitude = float(response_html.select(".latitude")[1].text.replace(",", "."))
+        longitude = float(response_html.select(".longitude")[1].text.replace(",", "."))
         return [latitude, longitude]
 
 
@@ -32,11 +33,11 @@ def add_new_user() -> None:
     Function to add new user
     :return:
     """
-    user = (User(
+    user = User(
         name=entry_name.get(),
         surname=entry_surname.get(),
         posts=entry_posts.get(),
-        location=entry_location.get())
+        location=entry_location.get()
     )
     users.append(user)
     display_users()
@@ -78,8 +79,7 @@ def edit_user() -> None:
     i = listbox_lista_uzytkownikow.index(ACTIVE)
     entry_name.insert(END, users[i].name)
 
-    button_dodaj_uztykownika.config(text="Zapisz zmiany", command=lambda: update_user(i))
-    display_users()
+    button_dodaj_uztykownika.config(text='Zapisz zmiany', command=lambda: update_user(i))
 
 
 def update_user(i) -> None:
@@ -87,11 +87,12 @@ def update_user(i) -> None:
     users[i].surname = entry_surname.get()
     users[i].posts = entry_posts.get()
     users[i].location = entry_location.get()
+    users[i].cords = users[i].get_cordinates()
     users[i].marker.delete()
-    users[i].location = map_widget.set_marker(users[i].cords[0], users[i].cords[1], text=f"{users[i].location}")
+    users[i].marker = map_widget.set_marker(users[i].cords[0], users[i].cords[1], text=f"{users[i].location}")
 
     display_users()
-    button_dodaj_uztykownika.config(text="Zapisz zmiany", command=add_new_user)
+    button_dodaj_uztykownika.config(text='Dodaj użytkownika', command=add_new_user)
     entry_name.delete(0, END)
     entry_surname.delete(0, END)
     entry_posts.delete(0, END)
@@ -130,7 +131,7 @@ label_napis_formularz = Label(ramka_formularz, text='Formularz edycji i dodawani
 label_name = Label(ramka_formularz, text='Imię')
 label_surname = Label(ramka_formularz, text='Nazwisko')
 label_posts = Label(ramka_formularz, text='Liczba postów')
-label_location = Label(ramka_formularz, text='Miejscowość')
+label_location = Label(ramka_formularz, text='Miejscowosc')
 
 entry_name = Entry(ramka_formularz)
 entry_surname = Entry(ramka_formularz, width=30)
@@ -174,7 +175,7 @@ label_opis_location_uzytkownika.grid(row=1, column=7)
 label_opis_location_uzytkownika_wartosc.grid(row=1, column=8)
 
 map_widget = tkintermapview.TkinterMapView(ramka_szczegoly_uzytkownika, width=800, height=400)
-map_widget.grid(row=2, column=0, columnspan=8)
+map_widget.grid(row=2, column=0, columnspan=9)
 map_widget.set_position(52.21, 21.00)
 map_widget.set_zoom(6)
 
